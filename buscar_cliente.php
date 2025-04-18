@@ -3,9 +3,9 @@ header('Content-Type: application/json');
 
 // Conexión a la base de datos (ajusta con tus datos reales)
 $host = 'localhost';
-$usuario = 'tu_usuario';
-$contrasena = 'tu_contraseña';
-$base_datos = 'nombre_de_tu_base_de_datos';
+$usuario = 'root';
+$contrasena = ''; // sin contraseña por defecto
+$base_datos = 'sistema_solicitudes'; // nombre de la base de datos en phpMyAdmin
 
 $conn = new mysqli($host, $usuario, $contrasena, $base_datos);
 if ($conn->connect_error) {
