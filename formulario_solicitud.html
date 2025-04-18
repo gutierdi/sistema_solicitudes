@@ -173,7 +173,7 @@ inputBusqueda.addEventListener("input", function () {
   fetch(`buscar_cliente.php?term=${encodeURIComponent(termino)}`)
     .then(response => response.json())
     .then(data => {
-      console.log("Sugerencias recibidas:", data); // 👈 Para depurar
+      console.log("Sugerencias recibidas:", data); // 👈 Para depurar comentario
       data.forEach(cliente => {
         const item = document.createElement("div");
         item.classList.add("suggestion-item");
