@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Formulario de Solicitud</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; font-weight: bold; margin-bottom: 5px; }
+    input[type="text"], input[type="email"], input[type="date"], select {
+      width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;
+    }
+    .suggestions {
+      border: 1px solid #ccc;
+      max-height: 150px;
+      overflow-y: auto;
+      position: absolute;
+      background: white;
+      z-index: 999;
+    }
+    .suggestion-item {
+      padding: 8px;
+      cursor: pointer;
+    }
+    .suggestion-item:hover {
+      background-color: #f0f0f0;
+    }
+    .botonera {
+      position: sticky;
+      top: 0;
+      background: #fff;
+      padding: 10px 0;
+      border-bottom: 1px solid #ccc;
+      z-index: 1000;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Formulario de Solicitud</h2>
+
+<div class="botonera">
+  <button type="button" onclick="limpiarFormulario()">Limpiar Formulario</button>
+  <button type="button" onclick="abrirFormularioProductos()">Agregar Productos</button>
+  <button type="button" onclick="subirArchivoAdjunto()">Subir Archivo Adjunto</button>
+  <button type="button" onclick="enviarSolicitud()">Enviar Solicitud</button>
+</div>
+
+<form id="formularioSolicitud">
+  <div class="form-group">
+    <label for="busqueda_cliente">Buscar Cliente (NIT o Nombre):</label>
+    <input type="text" id="busqueda_cliente" autocomplete="off">
+    <div id="sugerencias" class="suggestions"></div>
+  </div>
+
+  <div class="form-group">
+    <label for="codigo_identificacion">NIT / Identificación:</label>
+    <input type="text" id="codigo_identificacion" disabled>
+  </div>
+
+  <div class="form-group">
+    <label for="razon_social">Razón Social:</label>
+    <input type="text" id="razon_social" disabled>
+  </div>
+
+  <div class="form-group">
+    <label for="direccion">Dirección:</label>
+    <input type="text" id="direccion" disabled>
+  </div>
+
+  <div class="form-group">
+    <label for="ciudad">Ciudad:</label>
+    <input type="text" id="ciudad" disabled>
+  </div>
+
+  <div class="form-group">
+    <label for="telefono">Teléfono:</label>
+    <input type="text" id="telefono" disabled>
+  </div>
+
+  <div class="form-group">
+    <label for="correo_cliente">Correo:</label>
+    <input type="email" id="correo_cliente" disabled>
+  </div>
+
+  <div class="form-group">
+    <label for="persona_contacto">Persona de Contacto:</label>
+    <input type="text" id="persona_contacto" disabled>
+  </div>
+
+  <hr>
+
+  <div class="form-group">
+    <label for="tipo_solicitud">Tipo de Solicitud:</label>
+    <select id="tipo_solicitud">
+      <option value="">Seleccione...</option>
+      <option value="Garantia">Garantía</option>
+      <option value="Devolucion">Devolución</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="motivo">Motivo:</label>
+    <select id="motivo"></select>
+  </div>
+
+  <div class="form-group">
+    <label for="fecha_solicitud">Fecha en que recibe la solicitud:</label>
+    <input type="date" id="fecha_solicitud">
+  </div>
+
+  <div class="form-group">
+    <label for="tipo_entrega">¿Cómo entrega la mercancía?:</label>
+    <select id="tipo_entrega">
+      <option value="">Seleccione...</option>
+      <option value="Transportadora">Transportadora</option>
+      <option value="Bodega">Entrega directa en bodega principal</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="fecha_recepcion">Fecha en que recibe la mercancía:</label>
+    <input type="date" id="fecha_recepcion">
+  </div>
+
+  <div class="form-group">
+    <label for="fecha_envio">Fecha en que entrega/envía la mercancía a planta:</label>
+    <input type="date" id="fecha_envio">
+  </div>
+</form>
+
+<script>
+const inputBusqueda = document.getElementById("busqueda_cliente");
+const contenedorSugerencias = document.getElementById("sugerencias");
+const motivoSelect = document.getElementById("motivo");
+const tipoSolicitudSelect = document.getElementById("tipo_solicitud");
+
+tipoSolicitudSelect.addEventListener("change", function () {
+  motivoSelect.innerHTML = "";
+  const tipo = this.value;
+  const opciones = {
+    "Garantia": ["fallas de calidad", "producto usado", "trocado"],
+    "Devolucion": ["error despacho", "cliente no solicita", "error facturacion"]
+  };
+  if (opciones[tipo]) {
+    opciones[tipo].forEach(m => {
+      const option = document.createElement("option");
+      option.value = m;
+      option.textContent = m;
+      motivoSelect.appendChild(option);
+    });
+  }
+});
+
+inputBusqueda.addEventListener("input", function () {
+  const termino = inputBusqueda.value.trim();
+  contenedorSugerencias.innerHTML = "";
+
+  if (termino.length < 2) return;
+
+  fetch(`buscar_cliente.php?term=${encodeURIComponent(termino)}`)
+    .then(response => response.json())
+    .then(data => {
+      console.log("Sugerencias recibidas:", data); // 👈 Para depurar
+      data.forEach(cliente => {
+        const item = document.createElement("div");
+        item.classList.add("suggestion-item");
+        item.textContent = cliente.label;
+        item.addEventListener("click", () => {
+          inputBusqueda.value = cliente.label;
+          contenedorSugerencias.innerHTML = "";
+          llenarCampos(cliente.data);
+        });
+        contenedorSugerencias.appendChild(item);
+      });
+    });
+});
+
+function llenarCampos(cliente) {
+  document.getElementById("codigo_identificacion").value = cliente.codigo_identificacion;
+  document.getElementById("razon_social").value = cliente.razon_social;
+  document.getElementById("direccion").value = cliente.direccion;
+  document.getElementById("ciudad").value = cliente.ciudad;
+  document.getElementById("telefono").value = cliente.telefono;
+  document.getElementById("correo_cliente").value = cliente.correo_cliente;
+  document.getElementById("persona_contacto").value = cliente.persona_contacto;
+}
+
+function limpiarFormulario() {
+  document.getElementById("formularioSolicitud").reset();
+  document.getElementById("codigo_identificacion").value = "";
+  document.getElementById("razon_social").value = "";
+  document.getElementById("direccion").value = "";
+  document.getElementById("ciudad").value = "";
+  document.getElementById("telefono").value = "";
+  document.getElementById("correo_cliente").value = "";
+  document.getElementById("persona_contacto").value = "";
+  motivoSelect.innerHTML = "";
+}
+
+function abrirFormularioProductos() {
+  alert("Aquí se abrirá el formulario para agregar productos. Se desarrollará a continuación.");
+}
+
+function subirArchivoAdjunto() {
+  alert("Aquí se permitirá subir un archivo. Se desarrollará a continuación.");
+}
+
+function enviarSolicitud() {
+  alert("Aquí se validará y enviará la solicitud al servidor, generando un número único. Se desarrollará a continuación.");
+}
+</script>
+
+</body>
+</html>

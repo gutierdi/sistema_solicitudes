@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inicio de Sesión | Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .login-container {
+      max-width: 400px;
+      margin: 80px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .logo {
+      width: 100px;
+      display: block;
+      margin: 0 auto 20px;
+    }
+    .error-msg {
+      color: red;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <!-- Logo genérico -->
+    <img src="img/logo.png" alt="Logo" class="logo" />
+
+    <h3 class="text-center">Iniciar Sesión / Login</h3>
+
+    <!-- Mostrar mensaje de error si se activa por URL -->
+    <div id="error-container" class="error-msg mb-3" style="display: none;">
+      ⚠️ Credenciales incorrectas. / Incorrect credentials.
+    </div>
+
+    <form action="login.php" method="POST">
+      <div class="mb-3">
+        <label for="correo" class="form-label">Correo Electrónico / Email</label>
+        <input type="email" name="correo" id="correo" class="form-control" required />
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Contraseña / Password</label>
+        <input type="password" name="password" id="password" class="form-control" required />
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Entrar / Login</button>
+    </form>
+  </div>
+
+  <script>
+    // Verifica si hay un error en la URL para mostrar el mensaje
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('error') === '1') {
+      document.getElementById("error-container").style.display = "block";
+    }
+  </script>
+</body>
+</html>
